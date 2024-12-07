@@ -48,6 +48,7 @@ class WebDebugToolbarListener implements EventSubscriberInterface
         private string $excludedAjaxPaths = '^/bundles|^/_wdt',
         private ?ContentSecurityPolicyHandler $cspHandler = null,
         private ?DumpDataCollector $dumpDataCollector = null,
+        private bool $ajaxReplace = false,
     ) {
     }
 
@@ -96,6 +97,10 @@ class WebDebugToolbarListener implements EventSubscriberInterface
 
         // do not capture redirects or modify XML HTTP Requests
         if ($request->isXmlHttpRequest()) {
+            if (self::ENABLED === $this->mode && $this->ajaxReplace && !$response->headers->has('Symfony-Debug-Toolbar-Replace')) {
+                $response->headers->set('Symfony-Debug-Toolbar-Replace', '1');
+            }
+
             return;
         }
 
